@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SkyBouncer</title>
+  <style>
+    * {
+      outline: none;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(#2c2c2c, #000000);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: sans-serif;
+      color: #fff;
+      user-select: none;
+    }
+
+    #gameBox {
+      width: 300px;
+      height: 500px;
+      border: 2px solid #ffffff33;
+      position: relative;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    #ball {
+      width: 60px;
+      height: 60px;
+      position: absolute;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #ball-inner {
+      width: 50px;
+      height: 50px;
+      background: radial-gradient(circle at 20% 20%, #ffd700, #b8860b);
+      border-radius: 50%;
+      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.3);
+      position: absolute;
+      top: 5px;
+      left: 5px;
+    }
+
+    #counter {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    #startMessage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: #ffd700;
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: block;
+      z-index: 5;
+    }
+
+    .combo-text {
+      position: absolute;
+      color: #ffd700;
+      font-size: 16px;
+      font-weight: bold;
+      pointer-events: none;
+      animation: smoke 1s ease forwards;
+      z-index: 5;
+    }
+
+    @keyframes smoke {
+      0% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+    }
+
+    #wallet {
+      display: flex;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #ffd700;
+      padding: 8px 14px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    #wallet-icon {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="counter">🪙 0</div>
+  <div id="gameBox">
+    <div id="startMessage">Click the ball to start!</div>
+    <div id="ball">
+      <div id="ball-inner"></div>
+    </div>
+  </div>
+  <div id="wallet">
+    <span id="wallet-icon">👛</span>
+    <span id="wallet-value">0</span>
+  </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const ball = document.getElementById("ball");
+    const box = document.getElementById("gameBox");
+    const counter = document.getElementById("counter");
+    const startMessage = document.getElementById("startMessage");
+    const walletValue = document.getElementById("wallet-value");
+
+    const BALL_SIZE = 60;
+    const BOX_WIDTH = 300;
+    const BOX_HEIGHT = 500;
+
+    let posX = (BOX_WIDTH - BALL_SIZE) / 2;
+    let posY = BOX_HEIGHT - BALL_SIZE;
+    let velocityX = 0;
+    let velocityY = 0;
+    const gravity = 1.0;
+    const bounce = -0.5;
+    let score = 0;
+    let combo = 0;
+    let isStarted = false;
+
+    function updatePosition() {
+      ball.style.left = `${posX}px`;
+      ball.style.top = `${posY}px`;
+    }
+
+    updatePosition();
+
+    const clickSound = new Audio("https://www.soundjay.com/buttons/button-09.mp3");
+
+    const handleInteraction = () => {
+      clickSound.play().catch(() => {});
+      velocityY = -12;
+      velocityX = isStarted ? (Math.random() - 0.5) * 4 : 0;
+
+      combo++;
+      score += combo;
+      counter.innerText = `🪙 ${score}`;
+      walletValue.innerText = score;
+
+      const comboText = document.createElement("div");
+      comboText.className = "combo-text";
+      comboText.innerText = `+${combo}`;
+      comboText.style.left = `${posX + BALL_SIZE / 2}px`;
+      comboText.style.top = `${posY}px`;
+      box.appendChild(comboText);
+      setTimeout(() => comboText.remove(), 1000);
+
+      if (!isStarted) {
+        isStarted = true;
+        startMessage.style.display = "none";
+      }
+    };
+
+    ball.addEventListener("click", handleInteraction);
+    ball.addEventListener("touchstart", handleInteraction, { passive: false });
+
+    function gameLoop() {
+      if (isStarted) {
+        velocityY += gravity;
+        posY += velocityY;
+        posX += velocityX;
+
+        if (posY + BALL_SIZE > BOX_HEIGHT) {
+          posY = BOX_HEIGHT - BALL_SIZE;
+          velocityY *= bounce;
+          velocityX *= 0.3;
+          combo = 0;
+        }
+
+        if (posY < 0) {
+          posY = 0;
+          velocityY *= bounce;
+        }
+
+        if (posX < 0) {
+          posX = 0;
+          velocityX *= -1;
+        }
+
+        if (posX + BALL_SIZE > BOX_WIDTH) {
+          posX = BOX_WIDTH - BALL_SIZE;
+          velocityX *= -1;
+        }
+
+        updatePosition();
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  });
+</script>
+</body>
+</html>

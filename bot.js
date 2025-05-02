@@ -1,8 +1,12 @@
+const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
+const app = express();
+const port = process.env.PORT || 5000;
 
-// 🔹 **توکن جدید ربات خود را جایگذاری کن**
+// ایجاد ربات با توکن معتبر
 const bot = new TelegramBot('7575583391:AAHqZ3bwxiKVPV2zCQouH8aZfy_b3VAdgP4', { polling: true });
-// 🔹 وقتی کاربر دستور /start را می‌فرستد، این پیام و دکمه نمایش داده می‌شود.
+
+// کنترل دستور /start
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "🎮 خوش آمدید به SkyBouncerBot! روی دکمه‌ی زیر کلیک کن تا بازی را شروع کنی:", {
         reply_markup: {
@@ -13,18 +17,20 @@ bot.onText(/\/start/, (msg) => {
     });
 });
 
-// 🔹 ذخیره‌سازی امتیاز بازی که از WebApp ارسال می‌شود.
+// پاسخ به تمام پیام‌ها
 bot.on('message', (msg) => {
-    if (msg.web_app_data) {
-        const userScore = JSON.parse(msg.web_app_data.data).score;
-        bot.sendMessage(msg.chat.id, `✅ امتیاز شما ذخیره شد: ${userScore} 🏆`);
+    const chatId = msg.chat.id;
+    if (msg.text !== '/start') {
+        bot.sendMessage(chatId, `✅ شما گفتید: ${msg.text}`);
     }
 });
 
-// 🔹 پاسخ به /help برای نمایش راهنمای بازی
-bot.onText(/\/help/, (msg) => {
-    bot.sendMessage(msg.chat.id, "ℹ️ راهنمای بازی SkyBouncer:\n- برای شروع، روی دکمه '🚀 شروع بازی' کلیک کن.\n- امتیاز شما به‌صورت خودکار ثبت خواهد شد.");
+// تنظیم مسیر اصلی Express برای تست
+app.get('/', (req, res) => {
+    res.send('✅ Bot server is running!');
 });
 
-// 🔹 نمایش پیامی در کنسول برای اطلاع از اجرای موفق ربات
-console.log("✅ Bot is running...");
+// راه‌اندازی سرور Express
+app.listen(port, () => {
+    console.log(`🚀 Server running on port ${port}`);
+});

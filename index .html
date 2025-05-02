@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SkyBouncer</title>
+  <title>SkyBouncer - Telegram Game</title>
   <style>
     * {
       outline: none;
@@ -130,6 +130,11 @@
   </div>
 
 <script>
+  // بارگذاری Telegram WebApp API
+  const tgScript = document.createElement('script');
+  tgScript.src = 'https://telegram.org/js/telegram-web-app.js';
+  document.head.appendChild(tgScript);
+
   document.addEventListener("DOMContentLoaded", () => {
     const ball = document.getElementById("ball");
     const box = document.getElementById("gameBox");
@@ -150,6 +155,34 @@
     let score = 0;
     let combo = 0;
     let isStarted = false;
+    let tgWebApp;
+
+    // تنظیمات اولیه برای Telegram WebApp
+    function initTelegramWebApp() {
+      if (window.Telegram && Telegram.WebApp) {
+        tgWebApp = Telegram.WebApp;
+        
+        // گسترش صفحه به تمام صفحه
+        tgWebApp.expand();
+        
+        // نمایش دکمه بستن
+        tgWebApp.BackButton.show();
+        tgWebApp.BackButton.onClick(() => {
+          tgWebApp.close();
+        });
+        
+        // تغییر متن شروع بازی برای حالت تلگرام
+        startMessage.innerText = "Tap the ball to start!";
+      }
+    }
+
+    // بررسی هر 500ms تا Telegram WebApp API لود شود
+    const checkTgReady = setInterval(() => {
+      if (window.Telegram && Telegram.WebApp) {
+        clearInterval(checkTgReady);
+        initTelegramWebApp();
+      }
+    }, 500);
 
     function updatePosition() {
       ball.style.left = `${posX}px`;
@@ -169,6 +202,11 @@
       score += combo;
       counter.innerText = `🪙 ${score}`;
       walletValue.innerText = score;
+
+      // ارسال امتیاز به تلگرام اگر در محیط تلگرام اجرا شود
+      if (tgWebApp) {
+        tgWebApp.sendData(JSON.stringify({score: score}));
+      }
 
       const comboText = document.createElement("div");
       comboText.className = "combo-text";

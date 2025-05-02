@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 
 // 🔹 **توکن جدید ربات خود را جایگذاری کن**
-const bot = new TelegramBot('YOUR_BOT_TOKEN', { polling: true });
+const bot = new TelegramBot('7575583391:AAHqZ3bwxiKVPV2zCQouH8aZfy_b3VAdgP4', { polling: true });
 
 // 🔹 وقتی کاربر دستور /start را می‌فرستد، این پیام و دکمه نمایش داده می‌شود.
 bot.onText(/\/start/, (msg) => {

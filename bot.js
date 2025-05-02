@@ -2,7 +2,6 @@ const TelegramBot = require('node-telegram-bot-api');
 
 // 🔹 **توکن جدید ربات خود را جایگذاری کن**
 const bot = new TelegramBot('7575583391:AAHqZ3bwxiKVPV2zCQouH8aZfy_b3VAdgP4', { polling: true });
-
 // 🔹 وقتی کاربر دستور /start را می‌فرستد، این پیام و دکمه نمایش داده می‌شود.
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, "🎮 خوش آمدید به SkyBouncerBot! روی دکمه‌ی زیر کلیک کن تا بازی را شروع کنی:", {
